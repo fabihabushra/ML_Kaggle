@@ -69,7 +69,6 @@ cat_params = {
     'learning_rate': 0.15896864973143476,
     'l2_leaf_reg': 0.17662809103861252,
     'border_count': 110,
-    'random_seed': 42,
     'verbose': 0,
     'cat_features': categorical_features
 }
@@ -84,7 +83,6 @@ lgbm_params = {
     'colsample_bytree': 0.5835573172773423,
     'reg_alpha': 0.07842097032962848,
     'reg_lambda': 0.8055232718714938,
-    'random_state': 42
 }
 
 
