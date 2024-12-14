@@ -13,22 +13,9 @@ warnings.filterwarnings('ignore')
 
 
 train_df = pd.read_csv(r'e:\Study\HW\ML\kaggle\ml-2024-f\main_data\train_final.csv')
-test_df = pd.read_csv(r'e:\Study\HW\ML\kaggle\ml-2024-f\main_data\test_final.csv')
-
-
-if 'ID' in test_df.columns:
-    test_ids = test_df['ID'].copy()
-    test_df.drop('ID', axis=1, inplace=True)
-else:
-    test_ids = None
-
 
 train_df.replace('?', 'Missing', inplace=True)
-test_df.replace('?', 'Missing', inplace=True)
-
-
 train_df.columns = train_df.columns.str.strip()
-test_df.columns = test_df.columns.str.strip()
 
 
 train_df['income>50K'] = train_df['income>50K'].astype(int)
@@ -41,21 +28,12 @@ categorical_features = ['workclass', 'education', 'marital.status', 'occupation'
                         'relationship', 'race', 'sex', 'native.country']
 
 
-
 train_df_encoded = pd.get_dummies(train_df, columns=categorical_features)
 X = train_df_encoded.drop('income>50K', axis=1)
 y = train_df_encoded['income>50K']
 
 
-test_df_encoded = pd.get_dummies(test_df, columns=categorical_features)
-X_test =  test_df_encoded
-
-
-X_test = X_test.reindex(columns=X.columns, fill_value=0)
-
-
-
-skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+skf = StratifiedKFold(n_splits=5, shuffle=True)
 
 
 fold_accuracies = []
@@ -99,37 +77,3 @@ for train_index, val_index in skf.split(X, y):
 print("Cross-Validation Results:")
 print(f"Mean Accuracy: {np.mean(fold_accuracies):.4f}, Std: {np.std(fold_accuracies):.4f}")
 print(f"Mean AUROC: {np.mean(fold_aurocs):.4f}, Std: {np.std(fold_aurocs):.4f}")
-
-
-print("\nTraining on full training data...")
-
-
-ada_clf_full = AdaBoostClassifier(
-    estimator=DecisionTreeClassifier(max_depth=1, random_state=42),
-    n_estimators=100,
-    learning_rate=1.0,
-    algorithm='SAMME.R',
-    random_state=42
-)
-ada_clf_full.fit(X, y)
-
-
-test_preds = ada_clf_full.predict(X_test)
-test_proba = ada_clf_full.predict_proba(X_test)[:, 1]
-
-
-
-if test_ids is not None:
-    output_df = pd.DataFrame({
-        'ID': test_ids,
-        'Prediction': test_proba
-    })
-else:
-    output_df = pd.DataFrame({
-        'Prediction': test_proba
-    })
-
-
-output_path = r'e:\Study\HW\ML\kaggle\ml-2024-f\main_data\predictions.csv' 
-output_df.to_csv(output_path, index=False)
-print(f"\nPredictions saved to {output_path}")
